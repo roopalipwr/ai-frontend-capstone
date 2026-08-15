@@ -33,3 +33,8 @@ Use Conventional Commits, such as:
 - Explain what you changed.
 - Do not overwrite working code unnecessarily.
 - Keep the project structure organized.
+## Development Workflow
+
+- Test changes before committing them.
+- Keep each commit focused on one logical change.
+- Review the Git diff before creating a commit.
