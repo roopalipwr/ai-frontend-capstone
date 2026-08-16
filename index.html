@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | AI Frontend Capstone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <header class="settings-header">
+            <h1>Settings</h1>
+            <p>Manage your account settings and preferences.</p>
+        </header>
+
+        <form id="settings-form" novalidate>
+            <!-- Profile Settings -->
+            <section class="settings-section">
+                <h2>Profile Settings</h2>
+                <div class="form-group">
+                    <label for="full-name">Full Name</label>
+                    <input type="text" id="full-name" name="fullName" placeholder="John Doe" required minlength="2">
+                    <span class="error-message" id="full-name-error" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    <span class="error-message" id="email-error" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" name="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                </div>
+            </section>
+
+            <!-- Security -->
+            <section class="settings-section">
+                <h2>Security</h2>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="password" placeholder="••••••••" minlength="8">
+                    <span class="error-message" id="new-password-error" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" name="confirmPassword" placeholder="••••••••">
+                    <span class="error-message" id="confirm-password-error" aria-live="polite"></span>
+                </div>
+            </section>
+
+            <!-- Notifications -->
+            <section class="settings-section">
+                <h2>Notifications</h2>
+                <div class="toggle-group">
+                    <div class="toggle-info">
+                        <span class="toggle-label">Email Notifications</span>
+                        <span class="toggle-description">Receive updates about your account via email.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" name="emailNotifications" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <div class="toggle-info">
+                        <span class="toggle-label">Push Notifications</span>
+                        <span class="toggle-description">Receive alerts on your device.</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" name="pushNotifications">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Preferences -->
+            <section class="settings-section">
+                <h2>Preferences</h2>
+                <div class="form-group">
+                    <label for="theme">Theme Preference</label>
+                    <select id="theme" name="theme">
+                        <option value="light">Light Mode</option>
+                        <option value="dark">Dark Mode</option>
+                        <option value="system">System Default</option>
+                    </select>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit" id="submit-btn" class="btn-primary">Save Changes</button>
+                <button type="reset" class="btn-secondary">Reset</button>
+            </div>
+
+            <div id="form-feedback" class="form-feedback" aria-live="assertive"></div>
+        </form>
+    </main>
+
+    <script src="validation.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
