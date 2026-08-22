@@ -22,12 +22,12 @@
                 <h2>Profile Settings</h2>
                 <div class="form-group">
                     <label for="full-name">Full Name</label>
-                    <input type="text" id="full-name" name="fullName" placeholder="John Doe" required minlength="2">
+                    <input type="text" id="full-name" name="fullName" placeholder="John Doe" required minlength="2" aria-describedby="full-name-error">
                     <span class="error-message" id="full-name-error" aria-live="polite"></span>
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    <input type="email" id="email" name="email" placeholder="john@example.com" required aria-describedby="email-error">
                     <span class="error-message" id="email-error" aria-live="polite"></span>
                 </div>
                 <div class="form-group">
@@ -41,12 +41,12 @@
                 <h2>Security</h2>
                 <div class="form-group">
                     <label for="new-password">New Password</label>
-                    <input type="password" id="new-password" name="password" placeholder="••••••••" minlength="8">
+                    <input type="password" id="new-password" name="password" placeholder="••••••••" minlength="8" aria-describedby="new-password-error">
                     <span class="error-message" id="new-password-error" aria-live="polite"></span>
                 </div>
                 <div class="form-group">
                     <label for="confirm-password">Confirm New Password</label>
-                    <input type="password" id="confirm-password" name="confirmPassword" placeholder="••••••••">
+                    <input type="password" id="confirm-password" name="confirmPassword" placeholder="••••••••" aria-describedby="confirm-password-error">
                     <span class="error-message" id="confirm-password-error" aria-live="polite"></span>
                 </div>
             </section>
@@ -56,21 +56,21 @@
                 <h2>Notifications</h2>
                 <div class="toggle-group">
                     <div class="toggle-info">
-                        <span class="toggle-label">Email Notifications</span>
+                        <label id="email-notifications-label" for="email-notifications" class="toggle-label">Email Notifications</label>
                         <span class="toggle-description">Receive updates about your account via email.</span>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" name="emailNotifications" checked>
+                    <label class="switch" aria-label="Toggle Email Notifications">
+                        <input type="checkbox" id="email-notifications" name="emailNotifications" checked aria-labelledby="email-notifications-label">
                         <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="toggle-group">
                     <div class="toggle-info">
-                        <span class="toggle-label">Push Notifications</span>
+                        <label id="push-notifications-label" for="push-notifications" class="toggle-label">Push Notifications</label>
                         <span class="toggle-description">Receive alerts on your device.</span>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" name="pushNotifications">
+                    <label class="switch" aria-label="Toggle Push Notifications">
+                        <input type="checkbox" id="push-notifications" name="pushNotifications" aria-labelledby="push-notifications-label">
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -96,6 +96,10 @@
 
             <div id="form-feedback" class="form-feedback" aria-live="assertive"></div>
         </form>
+
+        <footer class="settings-footer">
+            <p>Need to verify validation behavior? <a href="tests.html" class="test-link">Run the Validation Test Suite</a></p>
+        </footer>
     </main>
 
     <script src="validation.js"></script>

@@ -6,10 +6,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmPasswordInput = document.getElementById('confirm-password');
     const feedbackEl = document.getElementById('form-feedback');
     const submitBtn = document.getElementById('submit-btn');
+    const themeSelect = document.getElementById('theme');
+
+    /**
+     * Applies the selected theme to the document.
+     * @param {string} theme 'light' | 'dark' | 'system'
+     */
+    const applyTheme = (theme) => {
+        if (theme === 'system') {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+    };
+
+    // Real-time system theme change detection
+    const systemMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    systemMedia.addEventListener('change', () => {
+        if (themeSelect.value === 'system') {
+            applyTheme('system');
+        }
+    });
+
+    // Theme selector change listener
+    themeSelect.addEventListener('change', () => {
+        applyTheme(themeSelect.value);
+    });
 
     /**
      * Updates visual feedback for a field.
-     * @param {HTMLElement} input 
+     * @param {HTMLElement} inputREPLACE ALL
      * @param {Object} result { isValid, message }
      */
     const updateFieldFeedback = (input, result) => {
@@ -17,11 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!result.isValid) {
             input.classList.add('invalid');
             input.setAttribute('aria-invalid', 'true');
-            if (errorEl) errorEl.textContent = result.message;
+            if (errorEl) {
+                errorEl.textContent = result.message;
+            }
         } else {
             input.classList.remove('invalid');
             input.removeAttribute('aria-invalid');
-            if (errorEl) errorEl.textContent = '';
+            if (errorEl) {
+                errorEl.textContent = '';
+            }
         }
     };
 
@@ -39,9 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
     passwordInput.addEventListener('input', () => {
         const passwordResult = window.Validation.validatePassword(passwordInput.value);
         updateFieldFeedback(passwordInput, passwordResult);
-        
-        // Also re-validate confirm password if it's not empty
-        if (confirmPasswordInput.value) {
+        // Re-validate confirm password if:
+        // 1. Confirm password has been typed
+        // 2. Both password fields are completely empty (clearing errors)
+        // 3. Confirm password currently displays an invalid mismatch error
+        const hasConfirmError = confirmPasswordInput.classList.contains('invalid');
+        if (confirmPasswordInput.value || (!passwordInput.value && !confirmPasswordInput.value) || hasConfirmError) {
             const confirmResult = window.Validation.validateConfirmPassword(passwordInput.value, confirmPasswordInput.value);
             updateFieldFeedback(confirmPasswordInput, confirmResult);
         }
@@ -58,30 +92,33 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Run all validations
+        // Run all field validations
         const nameResult = window.Validation.validateName(fullNameInput.value);
         const emailResult = window.Validation.validateEmail(emailInput.value);
         const passwordResult = window.Validation.validatePassword(passwordInput.value);
         const confirmResult = window.Validation.validateConfirmPassword(passwordInput.value, confirmPasswordInput.value);
 
-        // Update all feedback
+        // Update all inline validation feedback
         updateFieldFeedback(fullNameInput, nameResult);
         updateFieldFeedback(emailInput, emailResult);
         updateFieldFeedback(passwordInput, passwordResult);
         updateFieldFeedback(confirmPasswordInput, confirmResult);
 
-        const isFormValid = nameResult.isValid && emailResult.isValid && 
+        const isFormValid = nameResult.isValid && emailResult.isValid &&
                             passwordResult.isValid && confirmResult.isValid;
 
         if (!isFormValid) {
             showFeedback('Please correct the errors before saving.', 'error');
-            // Scroll to the first error
+            
+            // Focus the first invalid input element
             const firstError = form.querySelector('.invalid');
-            if (firstError) firstError.focus();
+            if (firstError) {
+                firstError.focus();
+            }
             return;
         }
 
-        // Simulate API call
+        // Simulate network API save call
         setLoadingState(true);
         
         try {
@@ -102,9 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function showFeedback(message, type) {
         feedbackEl.textContent = message;
         feedbackEl.className = `form-feedback ${type}`;
-        feedbackEl.style.display = ''; // Reset any manual display overrides
+        feedbackEl.style.display = ''; // Reset display style
         
-        // Auto-hide success message after 5 seconds
+        // Auto-hide success message after 5 seconds to match good UX standard
         if (type === 'success') {
             setTimeout(() => {
                 feedbackEl.style.display = 'none';
@@ -113,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Clears all validation errors and feedback.
+     * Clears all validation errors and inline warnings.
      */
     function clearValidationState() {
         const inputs = [fullNameInput, emailInput, passwordInput, confirmPasswordInput];
@@ -121,21 +158,59 @@ document.addEventListener('DOMContentLoaded', () => {
             input.classList.remove('invalid');
             input.removeAttribute('aria-invalid');
             const errorEl = document.getElementById(`${input.id}-error`);
-            if (errorEl) errorEl.textContent = '';
+            if (errorEl) {
+                errorEl.textContent = '';
+            }
         });
         feedbackEl.style.display = 'none';
         feedbackEl.textContent = '';
     }
 
     /**
-     * Form Reset Handling
+     * Custom Form Reset Handling
+     * Restores the form fields to their last saved state (or HTML defaults) and wipes validation states.
      */
-    form.addEventListener('reset', () => {
+    form.addEventListener('reset', (e) => {
+        e.preventDefault();
+        
+        // Wipe all error classes, messages and form feedbacks
         clearValidationState();
+        
+        // Pull latest saved settings to restore them, or fall back to HTML defaults
+        const saved = localStorage.getItem('capstone-settings');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                fullNameInput.value = data.fullName || '';
+                emailInput.value = data.email || '';
+                document.getElementById('bio').value = data.bio || '';
+                passwordInput.value = '';
+                confirmPasswordInput.value = '';
+                form.emailNotifications.checked = !!data.emailNotifications;
+                form.pushNotifications.checked = !!data.pushNotifications;
+                themeSelect.value = data.theme || 'light';
+            } catch (err) {
+                console.error('Failed to parse saved settings on reset:', err);
+                form.reset(); // Native fallback
+            }
+        } else {
+            // No localStorage saved, restore plain HTML baseline defaults
+            fullNameInput.value = '';
+            emailInput.value = '';
+            document.getElementById('bio').value = '';
+            passwordInput.value = '';
+            confirmPasswordInput.value = '';
+            form.emailNotifications.checked = true; // checked by default in HTML
+            form.pushNotifications.checked = false; // unchecked by default in HTML
+            themeSelect.value = 'light';
+        }
+        
+        // Keep the visual theme in sync with the active theme select dropdown
+        applyTheme(themeSelect.value);
     });
 
     /**
-     * Sets the form loading state.
+     * Sets the form saving/loading state on the primary button.
      * @param {boolean} isLoading 
      */
     function setLoadingState(isLoading) {
@@ -150,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Simulates an asynchronous API call.
+     * Simulates an asynchronous API network save call and stores the settings in localStorage.
      * @param {FormData} formData 
      * @returns {Promise}
      */
@@ -158,10 +233,60 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise((resolve) => {
             setTimeout(() => {
                 const data = {};
-                formData.forEach((value, key) => { data[key] = value; });
-                console.log('Simulated API Call with data:', data);
+                formData.forEach((value, key) => {
+                    if (key === 'emailNotifications' || key === 'pushNotifications') {
+                        data[key] = value === 'on';
+                    } else {
+                        data[key] = value;
+                    }
+                });
+                
+                // Ensure correct capture of checkbox states
+                data.emailNotifications = form.emailNotifications.checked;
+                data.pushNotifications = form.pushNotifications.checked;
+
+                console.log('Simulated API Call completed with data:', data);
+                
+                // Persist settings locally
+                localStorage.setItem('capstone-settings', JSON.stringify(data));
+                
                 resolve({ success: true });
             }, 1500);
         });
     }
+
+    /**
+     * Loads saved settings from localStorage and applies theme on startup.
+     */
+    function loadSavedSettings() {
+        const saved = localStorage.getItem('capstone-settings');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                
+                if (data.fullName) fullNameInput.value = data.fullName;
+                if (data.email) emailInput.value = data.email;
+                if (data.bio) document.getElementById('bio').value = data.bio;
+                
+                // Passwords are left unpopulated for standard privacy/security protocols
+                passwordInput.value = '';
+                confirmPasswordInput.value = '';
+                
+                form.emailNotifications.checked = !!data.emailNotifications;
+                form.pushNotifications.checked = !!data.pushNotifications;
+                
+                if (data.theme) {
+                    themeSelect.value = data.theme;
+                }
+            } catch (e) {
+                console.error('Failed to parse saved settings on load:', e);
+            }
+        }
+        
+        // Immediately enforce the current active theme
+        applyTheme(themeSelect.value);
+    }
+
+    // Run startup settings configuration loader
+    loadSavedSettings();
 });
